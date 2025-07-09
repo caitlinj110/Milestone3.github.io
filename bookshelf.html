@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>My Bookshelf</title>
+<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="style2.css"/>
+<link id="body_font" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<nav>
+  <a href="index.html">Home</a> |
+  <a href="bookshelf.html">My Bookshelf</a>
+</nav>
+
+<h1>My Public Bookshelf</h1>
+<div id="bookshelfResults"></div>
+
+<script>
+  function loadBookshelf() {
+  const userId = "111291494583913542047";
+  const shelfId = "1002";
+  const apiUrl = `https://www.googleapis.com/books/v1/users/${userId}/bookshelves/${shelfId}/volumes`;
+
+  $.getJSON(apiUrl, function (data) {
+    let html = "";
+    if (data.items && data.items.length > 0) {
+      data.items.forEach(book => {
+        const info = book.volumeInfo;
+        html += `
+          <div class="book">
+            <img src="${info.imageLinks?.thumbnail || ''}" alt="Cover" />
+            <h3 class="book-title" data-id="${book.id}">${info.title}</h3>
+          </div>
+        `;
+      });
+    } else {
+      html = "<p>No books found in this bookshelf.</p>";
+    }
+    $('#bookshelfResults').html(html);
+  }).fail(function () {
+    $('#bookshelfResults').html("<p>Failed to load bookshelf data.</p>");
+  });
+}
+$(document).ready(function() {
+  loadBookshelf();
+});
+
+document.addEventListener('click', function (e) {
+  if (e.target.classList.contains('book-title')) {
+    const bookId = e.target.dataset.id;
+    fetchBookDetails(bookId);
+  }
+});
+
+  html += `
+  <div class="book">
+    <img src="${info.imageLinks?.thumbnail || ''}" alt="Cover" />
+    <h3 class="book-title" data-id="${book.id}">${info.title}</h3>
+  </div>
+`;
+function loadBookshelf() {
+  const userId = "111291494583913542047";  // example public user ID
+  const shelfId = "1002";  // example public shelf ID
+  const apiUrl = `https://www.googleapis.com/books/v1/users/${userId}/bookshelves/${shelfId}/volumes`;
+
+  fetch(apiUrl)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.items || data.items.length === 0) {
+        document.getElementById('bookshelfResults').innerHTML = '<p>No books found in bookshelf.</p>';
+        return;
+      }
+      // Create clickable book titles only
+      const html = data.items.map(book => {
+        const title = book.volumeInfo.title || "Untitled";
+        return `<div class="book-title bookshelf-book" data-title="${title}" style="cursor:pointer; margin-bottom:5px;">${title}</div>`;
+      }).join('');
+      document.getElementById('bookshelfResults').innerHTML = html;
+    })
+    .catch(() => {
+      document.getElementById('bookshelfResults').innerHTML = '<p>Failed to load bookshelf data.</p>';
+    });
+}
+
+document.getElementById('bookshelfResults').addEventListener('click', e => {
+  if (e.target.classList.contains('bookshelf-book')) {
+    const bookName = e.target.dataset.title;
+    let display = document.getElementById('selectedBookName');
+    if (!display) {
+      display = document.createElement('div');
+      display.id = 'selectedBookName';
+      display.style.marginTop = '15px';
+      display.style.fontWeight = '600';
+      document.getElementById('bookshelfResults').appendChild(display);
+    }
+    display.textContent = `You clicked: ${bookName}`;
+  }
+});
+
+
+</script>
+</body>
+</html>
